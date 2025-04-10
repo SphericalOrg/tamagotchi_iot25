@@ -73,11 +73,6 @@ void loop() {
   gyro_z = Wire.read() << 8 | Wire.read(); // reading registers: 0x47 (GYRO_ZOUT_H) and 0x48 (GYRO_ZOUT_L)
 
   // ################################### ACTUACIÓN ###################################
-  Serial.print(lightState);
-  Serial.print(",");
-  Serial.print(soundVal);
-  Serial.print(",");
-  Serial.println(gyroVal);
 
   if (gyro_x >= 32000 || gyro_x <= -32000 ||
       gyro_y >= 32000 || gyro_y <= -32000 ||
@@ -116,6 +111,12 @@ void loop() {
     lcd.setCursor(0, 1);
     lcd.print(" (^_^) ");
   }
+
+  Serial.print(lightState);
+  Serial.print(",");
+  Serial.print(soundVal);
+  Serial.print(",");
+  Serial.println(gyroVal);
 
   // delay
   delay(250);
