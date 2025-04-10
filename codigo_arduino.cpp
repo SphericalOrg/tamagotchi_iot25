@@ -1,6 +1,6 @@
 #include "Wire.h" // This library allows you to communicate with I2C devices.
 #include <LiquidCrystal_I2C.h>
-#include <ESP32Servo.h> //Esto se cambiara a posteriori
+#include <ESP32Servo.h>
 
 const int MPU_ADDR = 0x68; // I2C address of the MPU-6050. If AD0 pin is set to HIGH, the I2C address will be 0x69.
 
@@ -13,18 +13,18 @@ int16_t gyro_x, gyro_y, gyro_z; // variables for gyro raw data
 
 LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLUMNS, LCD_ROWS);
 
-#define BUZZER 6
+#define BUZZER 4
 int MIC = A0;
 int soundVal = 0; // Initialize soundVal
 int gyroVal = 0; // Initialize gyroVal
 int lightState; // Declare lightState
 
-Servo servoLeft;  // create servo object to control a servo
-Servo servoRight;
-int servoPinLeft = 3;
-int servoPinRight = 5;
+Servo myservo1;  // create servo object to control the first servo
+int servoPin1 = 5;
+Servo myservo2;  // create servo object to control the second servo
+int servoPin2 = 6; // Define a different pin for the second servo
 
-int pos1 = 0;     // variable to store the servo position
+int pos1 = 0;    // variable to store the servo position
 int pos2 = 50;
 
 char tmp_str[7]; // temporary variable used in convert function
@@ -46,8 +46,8 @@ void setup() {
   lcd.init();
   lcd.backlight();
 
-  servoLeft.attach(servoPinLeft);   // attaches the left servo on specified pin to the servo object
-  servoRight.attach(servoPinRight);
+  myservo1.attach(servoPin1);  // attaches the first servo on specified pin to the servo object
+  myservo2.attach(servoPin2);  // attaches the second servo on specified pin to the servo object
 
   Wire.begin();
   Wire.beginTransmission(MPU_ADDR); // Begins a transmission to the I2C slave (GY-521 board)
@@ -64,15 +64,9 @@ void loop() {
   Wire.endTransmission(false); // the parameter indicates that the Arduino will send a restart. As a result, the connection is kept active.
   Wire.requestFrom(MPU_ADDR, 7 * 2, true); // request a total of 7*2=14 registers
 
-  Wire.read(); Wire.read();
-  Wire.read(); Wire.read();
-  Wire.read(); Wire.read();
-
   gyro_x = Wire.read() << 8 | Wire.read(); // reading registers: 0x43 (GYRO_XOUT_H) and 0x44 (GYRO_XOUT_L)
   gyro_y = Wire.read() << 8 | Wire.read(); // reading registers: 0x45 (GYRO_YOUT_H) and 0x46 (GYRO_YOUT_L)
   gyro_z = Wire.read() << 8 | Wire.read(); // reading registers: 0x47 (GYRO_ZOUT_H) and 0x48 (GYRO_ZOUT_L)
-
-  // ################################### ACTUACIÓN ###################################
 
   if (gyro_x >= 32000 || gyro_x <= -32000 ||
       gyro_y >= 32000 || gyro_y <= -32000 ||
@@ -82,13 +76,13 @@ void loop() {
     gyroVal = 1;
     soundVal = 1;
     for (int i = 0; i < 3; i++) {
-      servoLeft.write(pos1);   
-      servoRight.write(pos1);  
+      myservo1.write(pos1);
+      myservo2.write(pos1); 
       delay(200);
-      servoLeft.write(pos2);   
-      servoRight.write(pos2);  
+      myservo1.write(pos2);
+      myservo2.write(pos2); 
       delay(200);
-  }
+    }
   } else {
     analogWrite(BUZZER, 0);
     gyroVal = 0;
@@ -118,6 +112,5 @@ void loop() {
   Serial.print(",");
   Serial.println(gyroVal);
 
-  // delay
   delay(250);
 }
